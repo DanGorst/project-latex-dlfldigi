@@ -1,6 +1,8 @@
 'use strict';
 
-var decodeTelemetryData = function(base64data, telemetryKeys)    {
+var invalidTimeStringMessage = "Invalid time string passed to decoder";
+
+function decodeTelemetryData (base64data, telemetryKeys)    {
     if (base64data === null)    {
         throw "Cannot decode null data";
     }
@@ -28,4 +30,37 @@ var decodeTelemetryData = function(base64data, telemetryKeys)    {
     return telemetryInfo;
 }
 
-module.exports.decodeTelemetryData = decodeTelemetryData;
+function convertDateString(dateString) {
+    var timeComponents = dateString.split(':');
+    if (timeComponents.length != 3) {
+        throw invalidTimeStringMessage + ': ' + dateString;
+    }
+    
+    var numericTimeComponents = [];
+    for (var i = 0; i < timeComponents.length; ++i) {
+        var num = parseInt(timeComponents[i]);
+        if (isNaN(num) || num < 0) {
+            throw invalidTimeStringMessage + ': ' + dateString;
+        }
+        numericTimeComponents[i] = num;
+    }
+    if (numericTimeComponents[0] > 23
+       || numericTimeComponents[1] > 59
+       || numericTimeComponents[2] > 59) {
+        throw invalidTimeStringMessage + ': ' + dateString;
+    }
+    
+    // Our string only contains a time, not a date. For now, we're just using
+    // today's date
+    var date = new Date();
+    date.setHours(numericTimeComponents[0]);
+    date.setMinutes(numericTimeComponents[1]);
+    date.setSeconds(numericTimeComponents[2]);
+    return date;
+}
+
+module.exports = {
+    decodeTelemetryData: decodeTelemetryData,
+    convertDateString: convertDateString,
+    invalidTimeStringMessage: invalidTimeStringMessage
+}

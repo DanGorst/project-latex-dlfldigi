@@ -59,13 +59,7 @@ app.all('*', function(req, res) {
         
         // Our data originally has time as a string, but we convert it into a date.
         // This should allow us to sort our data by time later on
-        var timeComponents = telemetryInfo.time.split(':');
-        // Our string only contains a time, not a date. For now, we're just using
-        // today's date
-        var date = new Date();
-        date.setHours(timeComponents[0]);
-        date.setMinutes(timeComponents[1]);
-        date.setSeconds(timeComponents[2]);
+        var date = decoder.convertDateString(telemetryInfo.time);
         telemetryInfo.time = date;
         
         postTelemetryInfo(telemetryInfo);
