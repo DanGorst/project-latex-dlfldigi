@@ -52,19 +52,24 @@ function postTelemetryInfo(telemetryInfo)  {
 
 app.all('*', function(req, res) {
     console.log('Handling ' + req.method + ' request');
-    if (req.method === 'PUT' || req.method === 'POST')  {
-        var base64data = req.body.data._raw;
-        var keys = telemetryKeys.keys;
-        var telemetryInfo = decoder.decodeTelemetryData(base64data, keys);
-        
-        // Our data originally has time as a string, but we convert it into a date.
-        // This should allow us to sort our data by time later on
-        var date = decoder.convertDateString(telemetryInfo.time);
-        telemetryInfo.time = date;
-        
-        postTelemetryInfo(telemetryInfo);
+    try {
+        if (req.method === 'PUT' || req.method === 'POST')  {
+            var base64data = req.body.data._raw;
+            var keys = telemetryKeys.keys;
+            var telemetryInfo = decoder.decodeTelemetryData(base64data, keys);
+
+            // Our data originally has time as a string, but we convert it into a date.
+            // This should allow us to sort our data by time later on
+            var date = decoder.convertDateString(telemetryInfo.time);
+            telemetryInfo.time = date;
+
+            postTelemetryInfo(telemetryInfo);
+        }
+        res.send('Request received');
+    } catch(err) {
+        res.status(400);
+        res.send(err);
     }
-    res.send('Request received');
 });
 
 var port = Number(process.env.PORT || 3000);
