@@ -1,6 +1,7 @@
 'use strict';
 
 var invalidTimeStringMessage = "Invalid time string passed to decoder";
+var invalidDateStringMessage = "Invalid date string passed to decoder";
 
 function decodeTelemetryData (base64data, telemetryKeys)    {
     if (base64data === null)    {
@@ -30,29 +31,60 @@ function decodeTelemetryData (base64data, telemetryKeys)    {
     return telemetryInfo;
 }
 
-function convertDateString(dateString) {
-    var timeComponents = dateString.split(':');
+// We expect a string with the format DDMMYY
+function parseDateString(dateString) {
+    if (dateString === null || dateString === undefined || dateString.length != 6) {
+        throw invalidDateStringMessage + ': ' + dateString;
+    }
+    var dayString = dateString.substring(0, 2);
+    var monthString = dateString.substring(2, 4);
+    var yearString = dateString.substring(4, 6);
+    
+    var day = parseInt(dayString);
+    if (isNaN(day) || day < 1 || day > 31) {
+        throw invalidDateStringMessage + ': ' + dateString;
+    }
+    var month = parseInt(monthString);
+    if (isNaN(month) || month < 1 || month > 12) {
+        throw invalidDateStringMessage + ': ' + dateString;
+    }
+    // We're assuming this century, which is ok for our particular use case
+    var yearsSinceMillenium = parseInt(yearString);
+    if (isNaN(yearsSinceMillenium)) {
+        throw invalidDateStringMessage + ': ' + dateString;
+    }
+    var year = 2000 + yearsSinceMillenium;
+    
+    var date = new Date();
+    date.setFullYear(year, month - 1, day);
+    return date;
+}
+
+function convertDateTimeStrings(dateString, timeString) {
+    var date = parseDateString(dateString);
+    
+    if (timeString === null || timeString === undefined) {
+        throw invalidTimeStringMessage + ': ' + timeString;
+    }
+    var timeComponents = timeString.split(':');
     if (timeComponents.length != 3) {
-        throw invalidTimeStringMessage + ': ' + dateString;
+        throw invalidTimeStringMessage + ': ' + timeString;
     }
     
     var numericTimeComponents = [];
     for (var i = 0; i < timeComponents.length; ++i) {
         var num = parseInt(timeComponents[i]);
         if (isNaN(num) || num < 0) {
-            throw invalidTimeStringMessage + ': ' + dateString;
+            throw invalidTimeStringMessage + ': ' + timeString;
         }
         numericTimeComponents[i] = num;
     }
     if (numericTimeComponents[0] > 23
        || numericTimeComponents[1] > 59
        || numericTimeComponents[2] > 59) {
-        throw invalidTimeStringMessage + ': ' + dateString;
+        throw invalidTimeStringMessage + ': ' + timeString;
     }
     
-    // Our string only contains a time, not a date. For now, we're just using
-    // today's date
-    var date = new Date();
     date.setHours(numericTimeComponents[0]);
     date.setMinutes(numericTimeComponents[1]);
     date.setSeconds(numericTimeComponents[2]);
@@ -61,6 +93,7 @@ function convertDateString(dateString) {
 
 module.exports = {
     decodeTelemetryData: decodeTelemetryData,
-    convertDateString: convertDateString,
-    invalidTimeStringMessage: invalidTimeStringMessage
+    convertDateTimeStrings: convertDateTimeStrings,
+    invalidTimeStringMessage: invalidTimeStringMessage,
+    invalidDateStringMessage: invalidDateStringMessage
 }

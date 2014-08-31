@@ -58,10 +58,10 @@ app.all('*', function(req, res) {
             var keys = telemetryKeys.keys;
             var telemetryInfo = decoder.decodeTelemetryData(base64data, keys);
 
-            // Our data originally has time as a string, but we convert it into a date.
+            // Our data originally has time as a string, but we convert it into a javascript date.
             // This should allow us to sort our data by time later on
-            var date = decoder.convertDateString(telemetryInfo.time);
-            telemetryInfo.time = date;
+            var dateTime = decoder.convertDateTimeStrings(telemetryInfo.date, telemetryInfo.time);
+            telemetryInfo.time = dateTime;
 
             postTelemetryInfo(telemetryInfo);
         }
