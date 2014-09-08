@@ -65,7 +65,7 @@ app.all('*', function(req, res) {
 
             postTelemetryInfo(telemetryInfo);
         }
-        res.send('Request received');
+        res.send('Request received: ' + telemetryInfo);
     } catch(err) {
         res.status(400);
         res.send(err);
