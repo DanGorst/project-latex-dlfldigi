@@ -1,20 +1,29 @@
 'use strict';
 
+var adler32 = require("adler-32");
+
 var invalidTimeStringMessage = "Invalid time string passed to decoder";
 var invalidDateStringMessage = "Invalid date string passed to decoder";
 
 function decodeTelemetryData (base64data, telemetryKeys)    {
-    if (base64data === null)    {
-        throw "Cannot decode null data";
+    if (base64data === null || base64data === "")    {
+        throw "Cannot decode null or empty data";
     }
-    if (telemetryKeys === null) {
-        throw "Cannot decode data with null keys";
+    if (telemetryKeys === null || telemetryKeys.length === 0) {
+        throw "Cannot decode data with no keys";
     }
     
     var buffer = new Buffer(base64data, 'base64');
     var decodedDataStringWithChecksum = buffer.toString();
     // Split the string to separate out the checksum at the end
-    var decodedDataString = decodedDataStringWithChecksum.split('*')[0];
+    var dataAndChecksum = decodedDataStringWithChecksum.split('*');
+    var decodedDataString = dataAndChecksum[0];
+    var checksum = dataAndChecksum[1];
+    
+    if (!verifyChecksum(decodedDataString, checksum)) {
+        throw "Data doesn't match checksum";
+    }
+    
     // The data is comma-separated, so get the individual values
     var telemetryArray = decodedDataString.split(',');
     
@@ -29,6 +38,11 @@ function decodeTelemetryData (base64data, telemetryKeys)    {
     }
     
     return telemetryInfo;
+}
+
+function verifyChecksum(dataString, checksum) {
+    var comparisonChecksum = adler32.str(dataString).toString(16);
+    return checksum === comparisonChecksum;
 }
 
 // We expect a string with the format DDMMYY
@@ -95,5 +109,6 @@ module.exports = {
     decodeTelemetryData: decodeTelemetryData,
     convertDateTimeStrings: convertDateTimeStrings,
     invalidTimeStringMessage: invalidTimeStringMessage,
-    invalidDateStringMessage: invalidDateStringMessage
+    invalidDateStringMessage: invalidDateStringMessage,
+    verifyChecksum: verifyChecksum
 }

@@ -2,25 +2,25 @@ describe("Telemetry decoder", function() {
 	var decoder = require("../telemetryDecoder");
 
  	it("correctly decodes a valid string with a matching set of keys", function() {
-        var result = decoder.decodeTelemetryData("JCRsYXRleCw1NC4yLDIuNTY=", ["project_name", "latitude", "longitude"]);
+        var result = decoder.decodeTelemetryData("JCRsYXRleCw1NC4yLDIuNTYqMmE5MDA0NTM=", ["project_name", "latitude", "longitude"]);
     	expect(result).toEqual({project_name: "$$latex", latitude: "54.2", longitude: "2.56"});
   	});
     
     it("throws exception if passed a null string", function() {
-        expect(function() { decoder.decodeTelemetryData(null, []) }).toThrow("Cannot decode null data");
+        expect(function() { decoder.decodeTelemetryData(null, []) }).toThrow("Cannot decode null or empty data");
     });
     
     it("throws exception if passed null keys", function()   {
-        expect(function() { decoder.decodeTelemetryData("", null) }).toThrow("Cannot decode data with null keys");
+        expect(function() { decoder.decodeTelemetryData("MSozMjAwMzI=", null) }).toThrow("Cannot decode data with no keys");
     });
     
-    it("throws exception if passed empty string and empty set of keys", function()   {
-        expect(function() { decoder.decodeTelemetryData("", []) }).toThrow("Data doesn't match the keys passed in from the schema");
+    it("throws exception if passed empty string", function()   {
+        expect(function() { decoder.decodeTelemetryData("", ["someKey"]) }).toThrow("Cannot decode null or empty data");
     });
     
     it("throws exception if passed keys length doesn't match data length", function()   {
-        expect(function() { decoder.decodeTelemetryData("", ["someKey", "anotherKey"]) }).toThrow("Data doesn't match the keys passed in from the schema");
-        expect(function() { decoder.decodeTelemetryData("JCRsYXRleCw1NC4yLDIuNTY=", ["someKey", "anotherKey"]) }).toThrow("Data doesn't match the keys passed in from the schema");
+        expect(function() { decoder.decodeTelemetryData("MSozMjAwMzI=", ["someKey", "anotherKey"]) }).toThrow("Data doesn't match the keys passed in from the schema");
+        expect(function() { decoder.decodeTelemetryData("OTkuOTksOTkuOTksOTkuOTkqMjAwZjAzOGY=", ["someKey", "anotherKey"]) }).toThrow("Data doesn't match the keys passed in from the schema");
     });
     
     it("converts a valid time string to a date object", function() {
@@ -109,5 +109,10 @@ describe("Telemetry decoder", function() {
     
     it("throws exception if undefined date string is passed in", function() {
         expect(function() { decoder.convertDateTimeStrings(undefined, "12:30:15") }).toThrow(decoder.invalidDateStringMessage + ': undefined');
+    });
+    
+    it("verifies valid checksum", function() {
+        var result = decoder.verifyChecksum("1234567", "59b016d");
+        expect(result).toBeTruthy();
     });
 });
