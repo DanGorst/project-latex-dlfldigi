@@ -10,7 +10,7 @@
     "body-parser": "^1.6.2",
     "express": "^4.8.2",
     "jasmine-node": "^1.14.5",
-      "adler-32": "*"
+      "adler32-js": "*"
   },
   "devDependencies": {},
   "scripts": {

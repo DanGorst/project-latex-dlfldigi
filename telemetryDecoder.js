@@ -1,6 +1,6 @@
 'use strict';
 
-var adler32 = require("adler-32");
+var Adler32 = require("adler32-js");
 
 var invalidTimeStringMessage = "Invalid time string passed to decoder";
 var invalidDateStringMessage = "Invalid date string passed to decoder";
@@ -41,8 +41,9 @@ function decodeTelemetryData (base64data, telemetryKeys)    {
 }
 
 function verifyChecksum(dataString, checksum) {
-    var comparisonChecksum = adler32.str(dataString).toString(16);
-    return checksum === comparisonChecksum;
+    var hash = new Adler32();
+    hash.update(dataString);
+    return checksum === hash.digest('hex');
 }
 
 // We expect a string with the format DDMMYY

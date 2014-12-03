@@ -19,7 +19,7 @@ describe("Telemetry decoder", function() {
     });
     
     it("throws exception if passed keys length doesn't match data length", function()   {
-        expect(function() { decoder.decodeTelemetryData("MSozMjAwMzI=", ["someKey", "anotherKey"]) }).toThrow("Data doesn't match the keys passed in from the schema");
+        expect(function() { decoder.decodeTelemetryData("MSowMDMyMDAzMg==", ["someKey", "anotherKey"]) }).toThrow("Data doesn't match the keys passed in from the schema");
         expect(function() { decoder.decodeTelemetryData("OTkuOTksOTkuOTksOTkuOTkqMjAwZjAzOGY=", ["someKey", "anotherKey"]) }).toThrow("Data doesn't match the keys passed in from the schema");
     });
     
@@ -112,7 +112,12 @@ describe("Telemetry decoder", function() {
     });
     
     it("verifies valid checksum", function() {
-        var result = decoder.verifyChecksum("1234567", "59b016d");
+        var result = decoder.verifyChecksum("1234567", "059b016d");
+        expect(result).toBeTruthy();
+    });
+    
+    it("verifies real world data and checksum", function() {
+        var result = decoder.verifyChecksum("$$latex,0,031214,20:34:40,99.99,99.99,99.99,99.99,99.99,99.99,0.9396369056148697", "d59b1140");
         expect(result).toBeTruthy();
     });
 });
