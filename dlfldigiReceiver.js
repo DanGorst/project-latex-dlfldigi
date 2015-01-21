@@ -37,8 +37,7 @@ function postTelemetryInfo(telemetryInfo)  {
     });
 
     res.on('end', function() {
-      var resultObject = JSON.parse(responseString);
-      console.log(resultObject);
+      console.log(responseString);
     });
   });
 
