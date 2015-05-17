@@ -55,6 +55,7 @@ app.all('*', function(req, res) {
         if (req.method === 'PUT' || req.method === 'POST')  {
             var base64data = req.body.data._raw;
             var keys = telemetryKeys.keys;
+            console.log('Decoding data');
             var telemetryInfo = decoder.decodeTelemetryData(base64data, keys);
 
             // Our data originally has time as a string, but we convert it into a javascript date.
