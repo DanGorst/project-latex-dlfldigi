@@ -44,7 +44,10 @@ function decodeTelemetryData (base64data, telemetryKeys)    {
 function verifyChecksum(dataString, checksum) {
     var hash = new Adler32();
     hash.update(dataString);
-    return checksum === hash.digest('hex');
+    console.log('Checksum: ' + checksum);
+    var generatedHash = hash.digest('hex');
+    console.log('Generated hash: ' + generatedHash);
+    return checksum === generatedHash;
 }
 
 // We expect a string with the format DDMMYY
