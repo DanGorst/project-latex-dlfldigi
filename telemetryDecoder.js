@@ -21,9 +21,10 @@ function decodeTelemetryData (base64data, telemetryKeys)    {
     var checksum = dataAndChecksum[1];
     
     if (!verifyChecksum(decodedDataString, checksum)) {
-        // Temp: don't worry about checksum at this point
-        //throw "Data doesn't match checksum. Data is: " + decodedDataString + ". Checksum is: " + checksum;
+        console.log("Verify failed");
+        throw "Data doesn't match checksum. Data is: " + decodedDataString + ". Checksum is: " + checksum;
     }
+    console.log("Verify succeeded");
     
     // The data is comma-separated, so get the individual values
     var telemetryArray = decodedDataString.split(',');
