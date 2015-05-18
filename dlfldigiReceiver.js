@@ -12,7 +12,9 @@ function defaultContentTypeMiddleware (req, res, next) {
 }
 
 app.use(defaultContentTypeMiddleware);
-app.use(bodyParser());
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 function postTelemetryInfo(telemetryInfo)  {
   var infoString = JSON.stringify(telemetryInfo);
