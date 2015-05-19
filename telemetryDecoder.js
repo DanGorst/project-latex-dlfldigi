@@ -18,7 +18,8 @@ function decodeTelemetryData (base64data, telemetryKeys)    {
     // Split the string to separate out the checksum at the end
     var dataAndChecksum = decodedDataStringWithChecksum.split('*');
     var decodedDataString = dataAndChecksum[0];
-    var checksum = dataAndChecksum[1];
+    // Get rid of the newline from the end of our message
+    var checksum = dataAndChecksum[1].replace('\n', '');
     
     if (!verifyChecksum(decodedDataString, checksum)) {
         console.log("Verify failed");
