@@ -1,6 +1,7 @@
 'use strict';
 
 var Adler32 = require("adler32-js");
+var crc = require("crc");
 
 var invalidTimeStringMessage = "Invalid time string passed to decoder";
 var invalidDateStringMessage = "Invalid date string passed to decoder";
@@ -45,13 +46,24 @@ function decodeTelemetryData (base64data, telemetryKeys)    {
 }
 
 function verifyChecksum(dataString, checksum) {
-    var hash = new Adler32();
-    hash.update(dataString);
     console.log('Data string: ' + dataString);
     console.log('Checksum: ' + checksum);
+    var generatedChecksum = generateCRC16CCITTChecksum(dataString);
+    return checksum === generatedChecksum;
+}
+
+function generateCRC16CCITTChecksum(dataString) {
+    var generatedChecksum = crc.crc16ccitt(dataString).toString(16);
+    console.log('Generated checksum: ' + generatedChecksum);
+    return generatedChecksum;
+}
+
+function generateAdler32Checksum(dataString) {
+    var hash = new Adler32();
+    hash.update(dataString);
     var generatedHash = hash.digest('hex');
     console.log('Generated hash: ' + generatedHash);
-    return checksum === generatedHash;
+    return generatedHash;
 }
 
 // We expect a string with the format DDMMYY
@@ -119,5 +131,7 @@ module.exports = {
     convertDateTimeStrings: convertDateTimeStrings,
     invalidTimeStringMessage: invalidTimeStringMessage,
     invalidDateStringMessage: invalidDateStringMessage,
-    verifyChecksum: verifyChecksum
+    verifyChecksum: verifyChecksum,
+    generateAdler32Checksum: generateAdler32Checksum,
+    generateCRC16CCITTChecksum: generateCRC16CCITTChecksum
 }

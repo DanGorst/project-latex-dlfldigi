@@ -2,7 +2,7 @@ describe("Telemetry decoder", function() {
 	var decoder = require("../telemetryDecoder");
 
  	it("correctly decodes a valid string with a matching set of keys", function() {
-        var result = decoder.decodeTelemetryData("JCRsYXRleCw1NC4yLDIuNTYqMmE5MDA0NTM=", ["project_name", "latitude", "longitude"]);
+        var result = decoder.decodeTelemetryData("JCRsYXRleCw1NC4yLDIuNTYqZTczNQ==", ["project_name", "latitude", "longitude"]);
     	expect(result).toEqual({project_name: "$$latex", latitude: "54.2", longitude: "2.56"});
   	});
     
@@ -19,8 +19,8 @@ describe("Telemetry decoder", function() {
     });
     
     it("throws exception if passed keys length doesn't match data length", function()   {
-        expect(function() { decoder.decodeTelemetryData("MSowMDMyMDAzMg==", ["someKey", "anotherKey"]) }).toThrow("Data doesn't match the keys passed in from the schema");
-        expect(function() { decoder.decodeTelemetryData("OTkuOTksOTkuOTksOTkuOTkqMjAwZjAzOGY=", ["someKey", "anotherKey"]) }).toThrow("Data doesn't match the keys passed in from the schema");
+        expect(function() { decoder.decodeTelemetryData("dGVzdDEqM2Fj", ["someKey", "anotherKey"]) }).toThrow("Data doesn't match the keys passed in from the schema");
+        expect(function() { decoder.decodeTelemetryData("dGVzdDEsMiw1KmE1ZTU=", ["someKey", "anotherKey"]) }).toThrow("Data doesn't match the keys passed in from the schema");
     });
     
     it("converts a valid time string to a date object", function() {
@@ -111,13 +111,33 @@ describe("Telemetry decoder", function() {
         expect(function() { decoder.convertDateTimeStrings(undefined, "12:30:15") }).toThrow(decoder.invalidDateStringMessage + ': undefined');
     });
     
+    it("generates valid Adler32 checksum", function() {
+        var result = decoder.generateAdler32Checksum("1234567");
+        expect(result).toEqual("059b016d");
+    });
+    
+    it("verifies generates valid Adler32 checksum from real world data", function() {
+        var result = decoder.generateAdler32Checksum("$$latex,0,031214,20:34:40,99.99,99.99,99.99,99.99,99.99,99.99,0.9396369056148697");
+        expect(result).toEqual("d59b1140");
+    });
+    
+    it("generates valid CRC16CCITT checksum", function() {
+        var result = decoder.generateCRC16CCITTChecksum("1234567");
+        expect(result).toEqual("7718");
+    });
+    
+    it("verifies generates valid CRC16CCITT checksum from real world data", function() {
+        var result = decoder.generateCRC16CCITTChecksum("$$latex,123,230515,06:41:24,99.99,99.99,99.99");
+        expect(result).toEqual("e0ed");
+    });
+    
     it("verifies valid checksum", function() {
-        var result = decoder.verifyChecksum("1234567", "059b016d");
+        var result = decoder.verifyChecksum("1234567", "7718");
         expect(result).toBeTruthy();
     });
     
-    it("verifies real world data and checksum", function() {
-        var result = decoder.verifyChecksum("$$latex,0,031214,20:34:40,99.99,99.99,99.99,99.99,99.99,99.99,0.9396369056148697", "d59b1140");
-        expect(result).toBeTruthy();
+    it("fails invalid checksum", function() {
+        var result = decoder.verifyChecksum("1234567", "1234");
+        expect(result).toBeFalsy();
     });
 });
