@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var telemetryKeys = require('./telemetryKeys.json');
 var decoder = require('./telemetryDecoder');
 var http = require('http');
+var scoreKeeper = require('./scoreKeeper.js');
 
 var app = express();
 
@@ -66,10 +67,17 @@ app.all('*', function(req, res) {
             telemetryInfo.time = dateTime;
 
             postTelemetryInfo(telemetryInfo);
+            
+            scoreKeeper.good();
+            console.log('Success rate: ' + scoreKeeper.successRate());
         }
         res.send('Request received: ' + JSON.stringify(telemetryInfo));
     } catch(err) {
         res.status(400);
+        
+        scoreKeeper.bad();
+        console.log('Success rate: ' + scoreKeeper.successRate());
+        
         res.send(err);
     }
 });
